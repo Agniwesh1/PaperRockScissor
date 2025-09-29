@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rock Paper Scissors</title>
+  <link rel="stylesheet" href="R.css">
+</head>
+<body>
+  <h1>Rock Paper Scissors</h1>
+  <div class="choices">
+    <button onclick="playGame('rock')"><img src="Rock.jpeg" alt="Rock"></button>
+    <button onclick="playGame('paper')"><img src="Paper.png" alt="Paper"></button>
+    <button onclick="playGame('scissors')"><img src="Scissors.png" alt="Scissors"></button>
+  </div>
+
+  <div id="result"></div>
+
+  <div class="scoreboard">
+    <p>Player: <span id="player-score">0</span></p>
+    <p>Computer: <span id="computer-score">0</span></p>
+  </div>
+
+  <script src="R.js"></script>
+</body>
+</html>
