@@ -1,25 +1,185 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Rock Paper Scissors</title>
-  <link rel="stylesheet" href="R.css">
+<meta charset="UTF-8" />
+<title>Rock Paper Scissors Simulation with Images</title>
+<style>
+  body {
+    background: #212;
+    color: #fff;
+    text-align: center;
+    font-family: sans-serif;
+  }
+  #container {
+    position: relative;
+    width: 600px;
+    height: 400px;
+    border: 4px solid #000;
+    margin: 30px auto;
+    overflow: hidden;
+    background: #eee;
+  }
+  .item {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    pointer-events: none;
+  }
+  .item img {
+    width: 32px;
+    height: 32px;
+    pointer-events: none;
+    user-select: none;
+  }
+  #scoreboard {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    font-size: 1.5em;
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+  #scoreboard span {
+    min-width: 60px;
+    display: inline-block;
+  }
+</style>
 </head>
 <body>
-  <h1>Rock Paper Scissors</h1>
-  <div class="choices">
-    <button onclick="playGame('rock')"><img src="Rock.jpeg" alt="Rock"></button>
-    <button onclick="playGame('paper')"><img src="Paper.png" alt="Paper"></button>
-    <button onclick="playGame('scissors')"><img src="Scissors.png" alt="Scissors"></button>
+  <h2>Rock Paper Scissors Simulation with Images</h2>
+  <div id="scoreboard">
+    <span>🪨 <span id="rockCount"></span></span>
+    <span>📄 <span id="paperCount"></span></span>
+    <span>✂️ <span id="scissorsCount"></span></span>
   </div>
+  <div id="container"></div>
 
-  <div id="result"></div>
+  <script>
+    const container = document.getElementById('container');
+    const WIDTH = 600;
+    const HEIGHT = 400;
+    const RADIUS = 20;
+    const SPEED = 2;
+    const ITEMS_PER_TYPE = 10;
 
-  <div class="scoreboard">
-    <p>Player: <span id="player-score">0</span></p>
-    <p>Computer: <span id="computer-score">0</span></p>
-  </div>
+    const TYPES = [
+      { type: 'rock', img: 'rock.png' },
+      { type: 'paper', img: 'paper.png' },
+      { type: 'scissors', img: 'scissors.png' }
+    ];
 
-  <script src="R.js"></script>
+    // Determine winner type between a and b
+    function winner(a, b) {
+      if (a === b) return null;
+      if ((a === 'rock' && b === 'paper') ||
+          (a === 'paper' && b === 'scissors') ||
+          (a === 'scissors' && b === 'rock')) return b;
+      return a;
+    }
+
+    // Create items array
+    const items = [];
+
+    // Initialize items with random positions and velocities
+    for (const t of TYPES) {
+      for (let i = 0; i < ITEMS_PER_TYPE; i++) {
+        const angle = Math.random() * 2 * Math.PI;
+        const speed = SPEED + Math.random();
+        items.push({
+          type: t.type,
+          imgSrc: t.img,
+          x: Math.random() * (WIDTH - 2 * RADIUS),
+          y: Math.random() * (HEIGHT - 2 * RADIUS),
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          el: null,
+          imgEl: null
+        });
+      }
+    }
+
+    // Create DOM elements for items
+    items.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'item';
+      const img = document.createElement('img');
+      img.src = item.imgSrc;
+      el.appendChild(img);
+      container.appendChild(el);
+      item.el = el;
+      item.imgEl = img;
+    });
+
+    // Update scoreboard counts
+    function updateScores() {
+      const counts = { rock: 0, paper: 0, scissors: 0 };
+      items.forEach(item => counts[item.type]++);
+      document.getElementById('rockCount').textContent = counts.rock;
+      document.getElementById('paperCount').textContent = counts.paper;
+      document.getElementById('scissorsCount').textContent = counts.scissors;
+    }
+    updateScores();
+
+    // Animation and game logic loop
+    function step() {
+      // Move each item
+      for (const item of items) {
+        item.x += item.vx;
+        item.y += item.vy;
+
+        // Bounce off walls
+        if (item.x < 0 || item.x > WIDTH - 2 * RADIUS) item.vx *= -1;
+        if (item.y < 0 || item.y > HEIGHT - 2 * RADIUS) item.vy *= -1;
+
+        // Keep within container bounds
+        item.x = Math.max(0, Math.min(item.x, WIDTH - 2 * RADIUS));
+        item.y = Math.max(0, Math.min(item.y, HEIGHT - 2 * RADIUS));
+      }
+
+      // Collision detection and conversion logic
+      for (let i = 0; i < items.length; i++) {
+        for (let j = i + 1; j < items.length; j++) {
+          const a = items[i];
+          const b = items[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          if (dx * dx + dy * dy < (2 * RADIUS) * (2 * RADIUS)) {
+            const w = winner(a.type, b.type);
+            if (w && a.type !== b.type) {
+              a.type = w;
+              a.imgSrc = TYPES.find(t => t.type === w).img;
+              a.imgEl.src = a.imgSrc;
+
+              b.type = w;
+              b.imgSrc = TYPES.find(t => t.type === w).img;
+              b.imgEl.src = b.imgSrc;
+            }
+
+            // Swap velocities to bounce apart
+            [a.vx, b.vx] = [b.vx, a.vx];
+            [a.vy, b.vy] = [b.vy, a.vy];
+          }
+        }
+      }
+
+      // Render new positions
+      items.forEach(item => {
+        item.el.style.left = item.x + 'px';
+        item.el.style.top = item.y + 'px';
+      });
+
+      updateScores();
+      requestAnimationFrame(step);
+    }
+
+    // Start animation loop
+    requestAnimationFrame(step);
+  </script>
 </body>
 </html>

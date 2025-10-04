@@ -1,26 +1,35 @@
-let playerScore = 0;
-let computerScore = 0;
+let scores = { rock: 23, paper: 1, scissors: 11 };
 
-function playGame(playerChoice) {
+function updateScores() {
+  document.getElementById('rock-count').textContent = scores.rock;
+  document.getElementById('paper-count').textContent = scores.paper;
+  document.getElementById('scissors-count').textContent = scores.scissors;
+}
+
+function choose(userChoice) {
   const choices = ['rock', 'paper', 'scissors'];
-  const computerChoice = choices[Math.floor(Math.random() * 3)];
+  const random = Math.floor(Math.random() * 3);
+  const computerChoice = choices[random];
   let result = '';
 
-  if (playerChoice === computerChoice) {
-    result = "It's a draw! ";
+  if (userChoice === computerChoice) {
+    result = 'Draw!';
   } else if (
-    (playerChoice === 'rock' && computerChoice === 'scissors') ||
-    (playerChoice === 'paper' && computerChoice === 'rock') ||
-    (playerChoice === 'scissors' && computerChoice === 'paper')
+    (userChoice === 'rock' && computerChoice === 'scissors') ||
+    (userChoice === 'paper' && computerChoice === 'rock') ||
+    (userChoice === 'scissors' && computerChoice === 'paper')
   ) {
-    result = `You win!${playerChoice} beats ${computerChoice}`;
-    playerScore++;
+    result = 'You win!';
+    scores[userChoice]++;
   } else {
-    result = `You lose!  ${computerChoice} beats ${playerChoice}`;
-    computerScore++;
+    result = 'You lose!';
+    scores[userChoice]--;
   }
 
-  document.getElementById('result').textContent = result;
-  document.getElementById('player-score').textContent = playerScore;
-  document.getElementById('computer-score').textContent = computerScore;
+  updateScores();
+  document.getElementById('result').textContent = 
+    `You chose ${userChoice}, computer chose ${computerChoice}. ${result}`;
 }
+
+// Initialize score on load
+updateScores();
